@@ -17,6 +17,12 @@ let setup = (env) => {
 let backgroundColor = Utils.color(~r=0, ~g=0, ~b=0, ~a=255);
 let foregroundColor = Utils.color(~r=255, ~g=255, ~b=255, ~a=255);
 
+/* Curry this */
+let angleScale = Utils.remapf(~low1=-1.,
+                              ~high1=1.,
+                              ~low2=10.,
+                              ~high2=200.)
+
 let draw = (_state, env) => {
   /* Drawing Setup */
   Draw.background(backgroundColor, env);
@@ -38,12 +44,34 @@ let draw = (_state, env) => {
                                           ~high1=1.,
                                           ~low2=10.,
                                           ~high2=200.));
-  Draw.rect(~pos=(0, 0),
-            ~width=20,
-            ~height,
+
+  /* Make row of rectangles */
+  let barWidth = 30;
+  let barPadding = 4;
+  let numBars = (env.size.width / (barWidth + barPadding)) + 3; /* magic extra 3*/
+  let xOffset = env.size.width / 2 + barWidth / 2;
+  let drawWidth = barWidth - barPadding;
+
+  let angleOffset = 0.1; /*. controls ripple - 1.1 is interesting */
+  let offset = 0.;
+
+  for (i in 0 to numBars) {
+    let pos = (
+      barWidth * i - xOffset,
+      0
+    );
+
+    let a = angle +. (offset +. angleOffset *. float_of_int(i));
+    let h = int_of_float(angleScale(~value=sin(a)));
+
+    Draw.rect(~pos,
+            ~width=drawWidth,
+            ~height=h,
             env);
 
-  {..._state, angle: angle +. 0.1}
+  };
+
+  { angle: angle +. 0.1}
 };
 
 run(~setup, ~draw, ());
