@@ -1,11 +1,21 @@
 open Reprocessing;
 
-let setup = (env) => Env.size(~width=600,
-                              ~height=600,
-                              env);
+type stateT = {
+  angle: float,
+}
+
+let setup = (env) => {
+  Env.size(~width=600,
+            ~height=600,
+            env);
+
+  {
+    angle: 0.,
+  }
+}
 
 let backgroundColor = Utils.color(~r=0, ~g=0, ~b=0, ~a=255);
-let foregroundColor = Utils.color(~r=41, ~g=166, ~b=244, ~a=255); /* Blueish */
+let foregroundColor = Utils.color(~r=255, ~g=255, ~b=255, ~a=255);
 
 let draw = (_state, env) => {
   /* Drawing Setup */
@@ -20,11 +30,20 @@ let draw = (_state, env) => {
   Draw.translate(~x=midpointX,
                  ~y=midpointY,
                  env);
+  let { angle } = _state;
 
+  let oscillator = sin(angle);
+  let height = int_of_float(Utils.remapf(~value=oscillator,
+                                          ~low1=-1.,
+                                          ~high1=1.,
+                                          ~low2=10.,
+                                          ~high2=200.));
   Draw.rect(~pos=(0, 0),
-            ~width=300,
-            ~height=300,
+            ~width=20,
+            ~height,
             env);
+
+  {..._state, angle: angle +. 0.1}
 };
 
 run(~setup, ~draw, ());
